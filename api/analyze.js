@@ -34,7 +34,7 @@ export default async function handler(req, res) {
 
     const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: analysisPrompt }],
-      model: "gpt-4",
+      model: "gpt-4o-mini",
     });
 
     const analysis = JSON.parse(completion.choices[0].message.content);

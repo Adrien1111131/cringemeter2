@@ -335,7 +335,7 @@ Instructions finales :
   <div 
     className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none z-0"
     style={{
-      backgroundImage: `url('https://i.postimg.cc/5yj0xtNB/image.jpg')`
+      backgroundImage: `url('https://i.postimg.cc/Dw845XFQ/image-1.jpg')`
     }}
   />
   <div className="relative z-10">
