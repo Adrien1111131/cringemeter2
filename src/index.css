@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased font-poppins;
+  }
+  
+  body {
+    @apply min-h-screen bg-gradient-to-br from-[#FF8C42] to-[#FFDAB9] animate-gradient-xy;
+  }
+}
+
+@layer components {
+  .container-fluid {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+
+  .btn {
+    @apply rounded-xl px-6 py-3 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-[#FF8C42] to-[#FFDAB9] text-white hover:from-[#FF7C32] hover:to-[#FFD0A9] hover:scale-105 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-[#FFD0A9] focus:ring-2 focus:ring-[#FF8C42] focus:border-transparent transition-all duration-300;
+  }
+}
+
+/* Animations personnalisées */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
