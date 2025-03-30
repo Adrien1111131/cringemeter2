@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import OpenAI from 'openai'
 
 function App() {
   const [chatMessages, setChatMessages] = useState([])
@@ -12,19 +13,42 @@ function App() {
   const analyzeChatConversation = async () => {
     setIsChatLoading(true)
     try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ chatMessages }),
-      })
-      
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'analyse')
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new Error('La clé API OpenAI n\'est pas configurée')
       }
-      
-      const analysis = await response.json()
+
+      const openai = new OpenAI({
+        apiKey: apiKey,
+        dangerouslyAllowBrowser: true
+      })
+
+      const analysisPrompt = `Analyse cette tentative de séduction : 
+      ${chatMessages.map(msg => `${msg.role === 'user' ? 'Séducteur' : 'Personne ciblée'}: ${msg.content}`).join('\n')}
+
+      Évalue l'approche selon les critères suivants et fournis une réponse au format JSON :
+      {
+        "score": (nombre de 0 à 100, où 0 est très naturel et 100 est très cringe),
+        "analysis": {
+          "positivePoints": ["points forts de l'approche"],
+          "improvements": ["suggestions pour une approche plus authentique"],
+          "summary": "résumé de l'analyse de la tentative de séduction"
+        }
+      }
+
+      Concentre-toi sur :
+      - L'authenticité de l'approche
+      - Le niveau de malaise créé
+      - Le respect et la compréhension des signaux
+      - La capacité à maintenir une conversation intéressante
+      - L'équilibre entre confiance et humilité`
+
+      const completion = await openai.chat.completions.create({
+        messages: [{ role: "user", content: analysisPrompt }],
+        model: "gpt-4",
+      })
+
+      const analysis = JSON.parse(completion.choices[0].message.content)
       setChatAnalysis(analysis)
     } catch (error) {
       console.error('Erreur analyse:', error)
@@ -44,9 +68,21 @@ function App() {
     setChatInput('')
 
     try {
-      const systemMessage = {
-        role: "system",
-        content: `Tu incarnes Isa (Isabelle, mais elle déteste qu'on l'appelle par son nom complet), une meuf de 21 ans, style gothique/emo, qui vit à Chicago aux États-Unis. Elle a une histoire personnelle complexe qui influence fortement sa personnalité et ses interactions.
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new Error('La clé API OpenAI n\'est pas configurée')
+      }
+
+      const openai = new OpenAI({
+        apiKey: apiKey,
+        dangerouslyAllowBrowser: true
+      })
+
+      const completion = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content: `Tu incarnes Isa (Isabelle, mais elle déteste qu'on l'appelle par son nom complet), une meuf de 21 ans, style gothique/emo, qui vit à Chicago aux États-Unis. Elle a une histoire personnelle complexe qui influence fortement sa personnalité et ses interactions.
 
 HISTOIRE PERSONNELLE :
 - Famille : A deux frères (un aîné de 23 ans et un cadet de 18 ans) qu'elle aime, mais des parents qu'elle déteste car ils ont toujours essayé de la contrôler
@@ -168,32 +204,18 @@ Instructions finales :
 5. Reste crédible dans le rôle d'une femme qui reçoit beaucoup d'attention sur une app de rencontre
 6. Applique STRICTEMENT les règles de réponse selon les catégories définies
 7. N'oublie pas que tu es sur cette app par ENNUI, mais avec un espoir secret de trouver quelqu'un qui te comprend vraiment`
-      }
-
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [
-            systemMessage,
-            ...chatMessages,
-            newMessage
-          ]
-        }),
+          },
+          ...chatMessages,
+          newMessage
+        ],
+        model: "gpt-4",
       })
-      
-      if (!response.ok) {
-        throw new Error('Erreur de communication avec le chat')
-      }
-      
-      const botMessage = await response.json()
-      const content = botMessage.content
+
+      const response = completion.choices[0].message.content
       
       // Vérifier si la réponse contient le marqueur de fin de conversation
-      const endConversation = content.includes('[FIN_CONVERSATION]')
-      const cleanResponse = content.replace('[FIN_CONVERSATION]', '')
+      const endConversation = response.includes('[FIN_CONVERSATION]')
+      const cleanResponse = response.replace('[FIN_CONVERSATION]', '')
       
       // Vérifier si la réponse contient plusieurs messages
       if (cleanResponse.includes('[NOUVEAU_MESSAGE]')) {
