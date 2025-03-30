@@ -45,7 +45,7 @@ function App() {
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: analysisPrompt }],
-        model: "gpt-4",
+        model: "gpt-4o-mini",
       })
 
       const analysis = JSON.parse(completion.choices[0].message.content)
@@ -208,7 +208,7 @@ Instructions finales :
           ...chatMessages,
           newMessage
         ],
-        model: "gpt-4",
+        model: "gpt-4o-mini",
       })
 
       const response = completion.choices[0].message.content
