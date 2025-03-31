@@ -163,7 +163,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FF8C42] to-[#FFDAB9] animate-gradient-xy relative overflow-hidden">
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-5 pointer-events-none animate-float"
+        className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-20 pointer-events-none animate-float"
         style={{
           backgroundImage: `url('https://cdn.discordapp.com/attachments/1180603967571501076/1330838411841372180/ddt31_31032_A_group_of_people_awkwardly_dancing_out_of_sync_at__4495efb0-8390-43e0-8a5e-a6ae18598493.png')`
         }}
@@ -257,7 +257,7 @@ function App() {
             <div className="flex-1 relative">
               {/* Image d'arrière-plan fixe */}
               <div 
-                className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none z-0 bg-fixed"
+                className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-25 pointer-events-none z-0 bg-fixed"
                 style={{
                   backgroundImage: `url('${characters[selectedCharacter].backgroundImage}')`
                 }}
