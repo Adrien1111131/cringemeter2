@@ -416,73 +416,7 @@ function App() {
               </motion.div>
             )}
 
-            {/* Chat analysis */}
-            {chatAnalysis && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-6 space-y-4 bg-gradient-to-br from-[#FF8C42]/5 to-[#FFDAB9]/5 p-4 rounded-xl border-2 border-[#FFDAB9] backdrop-blur-sm"
-              >
-                <h3 className="text-lg font-bold text-[#FF8C42]">
-                  Analyse de l'approche 📊
-                </h3>
-
-                {/* Score */}
-                <div>
-                  <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden shadow-inner">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${chatAnalysis.score}%` }}
-                      transition={{ duration: 0.8 }}
-                      className={`absolute top-0 left-0 h-full ${
-                        chatAnalysis.score < 30
-                          ? 'bg-gradient-to-r from-green-400 to-[#FF8C42]'
-                          : chatAnalysis.score < 70
-                          ? 'bg-gradient-to-r from-[#FF8C42] to-[#FFDAB9]'
-                          : 'bg-gradient-to-r from-[#FFDAB9] to-red-500'
-                      }`}
-                    />
-                    <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm font-bold text-white">
-                      {chatAnalysis.score}/100
-                    </span>
-                  </div>
-                  <p className="text-center mt-2 font-medium">
-                    {chatAnalysis.score < 30
-                      ? '✨ Approche naturelle et intéressante !'
-                      : chatAnalysis.score < 70
-                      ? '🤔 L\'approche pourrait être plus authentique'
-                      : '😅 Approche un peu trop forcée...'}
-                  </p>
-                </div>
-
-                {/* Summary */}
-                <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl border-2 border-[#FFDAB9] shadow-lg hover:shadow-[0_8px_30px_rgb(255,140,66,0.1)] transition-all duration-300">
-                  <p className="text-gray-700">
-                    {chatAnalysis.analysis.summary}
-                  </p>
-                </div>
-
-                {/* Positive points */}
-                <div>
-                  <h4 className="font-bold text-green-500 mb-2">Points forts 🌟</h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {chatAnalysis.analysis.positivePoints.map((point, index) => (
-                      <li key={index} className="text-gray-700">{point}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Improvements */}
-                <div>
-                  <h4 className="font-bold text-[#FF8C42] mb-2">Suggestions 💡</h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {chatAnalysis.analysis.improvements.map((improvement, index) => (
-                      <li key={index} className="text-gray-700">{improvement}</li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-            )}
+            {/* Chat analysis section removed */}
           </div>
         </motion.div>
       </main>
