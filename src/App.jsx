@@ -254,32 +254,36 @@ function App() {
             </div>
 
             {/* Messages du chat */}
-            <div className="flex-1 space-y-4 max-h-[400px] overflow-y-auto relative">
+            <div className="flex-1 relative">
+              {/* Image d'arrière-plan fixe */}
               <div 
-                className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none z-0"
+                className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none z-0 bg-fixed"
                 style={{
                   backgroundImage: `url('${characters[selectedCharacter].backgroundImage}')`
                 }}
               />
-              <div className="relative z-10">
-                {chatMessages.map((msg, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: msg.role === 'user' ? 20 : -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] p-4 rounded-xl shadow-md ${
-                      msg.role === 'user'
-                        ? 'bg-gradient-to-r from-[#FF8C42] to-[#FFDAB9] text-white'
-                        : 'bg-white/95 backdrop-blur-sm text-gray-700'
-                    }`}
+              {/* Conteneur de défilement */}
+              <div className="max-h-[400px] overflow-y-auto relative">
+                <div className="space-y-4 relative z-10">
+                  {chatMessages.map((msg, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: msg.role === 'user' ? 20 : -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    {msg.content}
-                  </div>
-                </motion.div>
-                ))}
+                    <div
+                      className={`max-w-[80%] p-4 rounded-xl shadow-md ${
+                        msg.role === 'user'
+                          ? 'bg-gradient-to-r from-[#FF8C42] to-[#FFDAB9] text-white'
+                          : 'bg-white/95 backdrop-blur-sm text-gray-700'
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
