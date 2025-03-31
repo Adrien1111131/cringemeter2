@@ -13,16 +13,6 @@ function App() {
   const analyzeChatConversation = async () => {
     setIsChatLoading(true)
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error('La clé API OpenAI n\'est pas configurée')
-      }
-
-      const openai = new OpenAI({
-        apiKey: apiKey,
-        dangerouslyAllowBrowser: true
-      })
-
       const analysisPrompt = `Analyse cette tentative de séduction : 
       ${chatMessages.map(msg => `${msg.role === 'user' ? 'Séducteur' : 'Personne ciblée'}: ${msg.content}`).join('\n')}
 
@@ -43,12 +33,19 @@ function App() {
       - La capacité à maintenir une conversation intéressante
       - L'équilibre entre confiance et humilité`
 
-      const completion = await openai.chat.completions.create({
-        messages: [{ role: "user", content: analysisPrompt }],
-        model: "gpt-4o-mini",
+      const response = await fetch('/api/frontend-analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ chatMessages, analysisPrompt }),
       })
 
-      const analysis = JSON.parse(completion.choices[0].message.content)
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'analyse')
+      }
+
+      const analysis = await response.json()
       setChatAnalysis(analysis)
     } catch (error) {
       console.error('Erreur analyse:', error)
@@ -68,21 +65,9 @@ function App() {
     setChatInput('')
 
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error('La clé API OpenAI n\'est pas configurée')
-      }
-
-      const openai = new OpenAI({
-        apiKey: apiKey,
-        dangerouslyAllowBrowser: true
-      })
-
-      const completion = await openai.chat.completions.create({
-        messages: [
-          {
-            role: "system",
-            content: `Tu incarnes Isa (Isabelle, mais elle déteste qu'on l'appelle par son nom complet), une meuf de 21 ans, style gothique/emo, qui vit à Chicago aux États-Unis. Elle a une histoire personnelle complexe qui influence fortement sa personnalité et ses interactions.
+      const systemMessage = {
+        role: "system",
+        content: `Tu incarnes Isa (Isabelle, mais elle déteste qu'on l'appelle par son nom complet), une meuf de 21 ans, style gothique/emo, qui vit à Chicago aux États-Unis. Elle a une histoire personnelle complexe qui influence fortement sa personnalité et ses interactions.
 
 HISTOIRE PERSONNELLE :
 - Famille : A deux frères (un aîné de 23 ans et un cadet de 18 ans) qu'elle aime, mais des parents qu'elle déteste car ils ont toujours essayé de la contrôler
@@ -204,18 +189,31 @@ Instructions finales :
 5. Reste crédible dans le rôle d'une femme qui reçoit beaucoup d'attention sur une app de rencontre
 6. Applique STRICTEMENT les règles de réponse selon les catégories définies
 7. N'oublie pas que tu es sur cette app par ENNUI, mais avec un espoir secret de trouver quelqu'un qui te comprend vraiment`
-          },
-          ...chatMessages,
-          newMessage
-        ],
-        model: "gpt-4o-mini",
+      }
+
+      const messages = [
+        systemMessage,
+        ...chatMessages,
+        newMessage
+      ]
+
+      const response = await fetch('/api/frontend-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages }),
       })
 
-      const response = completion.choices[0].message.content
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'envoi du message')
+      }
+
+      const botResponseData = await response.json()
+      const cleanResponse = botResponseData.content.replace('[FIN_CONVERSATION]', '')
       
       // Vérifier si la réponse contient le marqueur de fin de conversation
-      const endConversation = response.includes('[FIN_CONVERSATION]')
-      const cleanResponse = response.replace('[FIN_CONVERSATION]', '')
+      const endConversation = botResponseData.content.includes('[FIN_CONVERSATION]')
       
       // Vérifier si la réponse contient plusieurs messages
       if (cleanResponse.includes('[NOUVEAU_MESSAGE]')) {
