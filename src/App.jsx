@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
 import OpenAI from 'openai'
 import characters from './characters'
 
@@ -11,6 +11,8 @@ function App() {
   const [chatEnded, setChatEnded] = useState(false)
   const [chatAnalysis, setChatAnalysis] = useState(null)
   const [botEndedChat, setBotEndedChat] = useState(false)
+  const [endReason, setEndReason] = useState(null) // 'normal', 'boring', 'inappropriate'
+  const [showHeartBreakAnimation, setShowHeartBreakAnimation] = useState(false)
   const [showCharacterSelect, setShowCharacterSelect] = useState(false)
 
   const analyzeChatConversation = async () => {
@@ -109,10 +111,28 @@ function App() {
       }
 
       const botResponseData = await response.json()
-      const cleanResponse = botResponseData.content.replace('[FIN_CONVERSATION]', '')
+      // Nettoyer la réponse et vérifier les marqueurs de fin
+      let cleanResponse = botResponseData.content
+      let endConversation = false
+      let endReasonType = 'normal'
       
-      // Vérifier si la réponse contient le marqueur de fin de conversation
-      const endConversation = botResponseData.content.includes('[FIN_CONVERSATION]')
+      // Vérifier si la réponse contient le marqueur de conversation ennuyeuse
+      if (cleanResponse.includes('[CONVERSATION_ENNUYEUSE][FIN_CONVERSATION]')) {
+        cleanResponse = cleanResponse.replace('[CONVERSATION_ENNUYEUSE][FIN_CONVERSATION]', '')
+        endConversation = true
+        endReasonType = 'boring'
+      } 
+      // Vérifier si la réponse contient le marqueur de conversation déplacée
+      else if (cleanResponse.includes('[CONVERSATION_DEPLACEE][FIN_CONVERSATION]')) {
+        cleanResponse = cleanResponse.replace('[CONVERSATION_DEPLACEE][FIN_CONVERSATION]', '')
+        endConversation = true
+        endReasonType = 'inappropriate'
+      }
+      // Vérifier si la réponse contient le marqueur standard de fin de conversation
+      else if (cleanResponse.includes('[FIN_CONVERSATION]')) {
+        cleanResponse = cleanResponse.replace('[FIN_CONVERSATION]', '')
+        endConversation = true
+      }
       
       // Vérifier si la réponse contient plusieurs messages
       if (cleanResponse.includes('[NOUVEAU_MESSAGE]')) {
@@ -147,10 +167,15 @@ function App() {
       if (endConversation) {
         setBotEndedChat(true)
         setChatEnded(true)
+        setEndReason(endReasonType)
+        
+        // Afficher l'animation des cœurs brisés
+        setShowHeartBreakAnimation(true)
+        
         // Lancer l'analyse après un court délai
         setTimeout(() => {
           analyzeChatConversation()
-        }, 1500)
+        }, 3000) // Délai plus long pour laisser l'animation se jouer
       }
     } catch (error) {
       console.error('Erreur chat:', error)
@@ -331,14 +356,63 @@ function App() {
               </motion.button>
             )}
 
+            {/* Animation des cœurs brisés */}
+            <AnimatePresence>
+              {showHeartBreakAnimation && (
+                <motion.div
+                  className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute text-4xl"
+                      initial={{ 
+                        x: 0, 
+                        y: 0, 
+                        scale: 0,
+                        rotate: Math.random() * 180 - 90
+                      }}
+                      animate={{ 
+                        x: (Math.random() - 0.5) * 400, 
+                        y: (Math.random() - 0.5) * 400,
+                        scale: [0, 1.5, 0],
+                        rotate: [Math.random() * 180 - 90, Math.random() * 360 - 180]
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        ease: "easeOut",
+                        times: [0, 0.3, 1],
+                        delay: Math.random() * 0.5
+                      }}
+                    >
+                      💔
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Brutal end message */}
             {botEndedChat && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full py-3 bg-red-100/90 backdrop-blur-sm text-red-600 font-bold text-center rounded-xl border-2 border-red-200"
+                className={`w-full py-3 backdrop-blur-sm font-bold text-center rounded-xl border-2 ${
+                  endReason === 'boring' 
+                    ? 'bg-blue-100/90 text-blue-600 border-blue-200' 
+                    : endReason === 'inappropriate' 
+                      ? 'bg-purple-100/90 text-purple-600 border-purple-200'
+                      : 'bg-red-100/90 text-red-600 border-red-200'
+                }`}
               >
-                Conversation terminée brutalement ! 💔
+                {endReason === 'boring' 
+                  ? 'Conversation trop ennuyeuse... 😴💔' 
+                  : endReason === 'inappropriate' 
+                    ? 'Conversation inappropriée ! 🚫💔'
+                    : 'Conversation terminée brutalement ! 💔'}
               </motion.div>
             )}
 
